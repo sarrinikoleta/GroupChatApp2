@@ -11,8 +11,6 @@ public class UserNode implements Node{
     private static BufferedReader keyboard;
     private static Socket requestSocket;
     private PrintWriter initializeQuery;
-    //private BufferedWriter writer;
-    //private BufferedReader out;
 
     private ObjectInputStream input;
     private ObjectOutputStream output;
@@ -35,27 +33,34 @@ public class UserNode implements Node{
 
         keyboard = new BufferedReader(new InputStreamReader(System.in));
         profileName = keyboard.readLine();
-        UserNode user = new UserNode(profileName);
 
-        user.connect();  //Συνδεση του UserNode με εναν τυχαίο Broker
-        //System.out.println("mpika  ston broker");
+        while(true) {
 
-        //mallon prepei na einai se loop gia na kanei back se epilogh topic
-        //apo edw
-        port = user.init(getSocket().getPort());
+            UserNode user = new UserNode(profileName);
 
+            user.connect();  //Συνδεση του UserNode με εναν τυχαίο Broker
 
-        System.out.println("Init result:"+ port);
+            port = user.init(getSocket().getPort());
 
+            System.out.println("Init result:" + port);
 
-        //Thread consumer = new Consumer(getSocket(),topic,profileName);
-        //consumer.start();
+            //Thread consumer = new Consumer(getSocket(),topic,profileName);
+            //consumer.start();
 
-        Thread publisher = new Publisher(getSocket(),topic,profileName,port);
-        publisher.start();
+            if(port!=0) {
 
-        //consumer.join();
-        publisher.join();
+                Thread publisher = new Publisher(getSocket(), topic, profileName, port);
+                publisher.start();
+
+                //consumer.join();
+                publisher.join();
+            }
+            System.out.println("Want to continue? Type 'quit' if not. ");
+
+            if(keyboard.readLine().equals("quit")){
+                break;
+            }
+        }
 
         //mexri edw
 
@@ -95,6 +100,16 @@ public class UserNode implements Node{
                 //String
                 topic = keyboard.readLine().trim();
 
+                if (topic.equals("quit")) { //Terminal message
+                    output.writeObject(new SocketMessage("TERMINAL",new SocketMessageContent(topic)));
+                    output.flush();
+
+                    port=0;
+
+                    disconnect(); //Disconnecting from the Broker
+                    break;
+                }
+
                 // Ask broker for topic info.
                 output.writeObject(new SocketMessage("USER_TOPIC_LOOKUP",new SocketMessageContent(topic)));
                 output.flush();
@@ -105,11 +120,7 @@ public class UserNode implements Node{
                 System.out.println(reply.getType());
 
 
-                if (topic.equals("quit")) { //Terminal message
-                    initializeQuery.println(topic); //Sends terminal message to Broker so that he can disconnect and terminate the Thread
-                    disconnect(); //Disconnecting from the Broker
-                    break;
-                }
+
 
                 /**
                  * The topic we're interested in does not exists.

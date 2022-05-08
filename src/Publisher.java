@@ -40,53 +40,33 @@ public class Publisher extends Thread {
             System.out.println("RUN TOU PUBLISHER");
 
             // Dinoume to Connection Type ston broker
-
             out.writeObject(new SocketMessage("PUBLISHER_CONNECTION",new SocketMessageContent(profileName)));
             out.flush();
-
-            out.writeObject(new SocketMessage("PUBLISHER_CONNECTION",new SocketMessageContent(topic)));
-            out.flush();
-
 
             SocketMessage reply = (SocketMessage) in.readObject();
 
             keyboard = new BufferedReader(new InputStreamReader(System.in));
             String message;
-            //MultimediaFile m = null;
-            //Value v = null;
 
             if (reply.getType().equals("BROKER_CONNECTED")){
                 System.out.println("Got a connection Publisher - Broker ...Opening streams....");
 
-                System.out.println("Start send messages");
+                System.out.println("Starting to send messages");
                 while(true){
 
                     message = keyboard.readLine().trim();
                     //System.out.println(message);
 
                     if(message.equals("quit")){  //gia disconnect
-                        out.writeObject(new SocketMessage("PUSH_STRING_MESSAGE",new SocketMessageContent("quit")));
+                        out.writeObject(new SocketMessage("PUSH_QUIT_MESSAGE",new SocketMessageContent("quit")));
                         out.flush();
                         System.out.println("End of sending strings");
                         break;
-                    } //else if (message.equals("back")){
-                    // break;
-                    //}
+                    }
                     else{
                         push(topic,message);
                     }
 
-                    /*
-                    for(int i=0;i<5;i++){
-                        System.out.println("Sending string number: " + i);
-                        if(i==4){
-                            out.writeObject(new SocketMessage("PUSH_STRING_MESSAGE",new SocketMessageContent("last")));
-                        }else{
-                            out.writeObject(new SocketMessage("PUSH_STRING_MESSAGE",new SocketMessageContent("henlo")));
-                        }
-                        out.flush();
-                    }
-                    */
                 }
             }
 

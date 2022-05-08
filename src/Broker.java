@@ -91,7 +91,6 @@ public class Broker implements Node{
 
         }
 
-        //System.out.println("Size: " + brokers.size());
         for(Broker b: this.brokers) {
             System.out.println("Broker ID: " + b.getBrokerId() + " \nManaging Topics: ");
             for (String i : b.myTopics.keySet()) {
@@ -109,17 +108,12 @@ public class Broker implements Node{
             Socket user = providerSocket.accept();
             System.out.println("[BROKER] Connected to a UserNode!");
 
-            //Συμφωνα με το LAB2 ό,τι κανει μετα ο server είναι σε ενα thread που παίρνει όρισμα το socket
-            //Thread t = new ActionsForUserNode(client);
-            //t.start();
-
             ActionsForUserNodes consumerThread = new ActionsForUserNodes(user, this.getBrokerId(), port);
-            pool.execute(consumerThread); //like start
+            pool.execute(consumerThread); //Like start
 
         }
 
     }
-
 
 
 
@@ -149,7 +143,6 @@ public class Broker implements Node{
                 String profileName = "";
 
                 //UserNode establishes whether he is in communication with a User, Publisher or a Consumer
-
                 SocketMessage response = (SocketMessage) inP.readObject();
                 connectionType = response.getType();
                 System.out.println(connectionType + " " + response.getContent().getMessage());
@@ -174,7 +167,6 @@ public class Broker implements Node{
                                     legitTopic = true;
                                     currentTopic = response.getContent().getMessage();
                                     //EDW READER TOU TXT KAI ADD STO TOPIC.HISTORY TOU HASHMAP
-
                                     break;
                                 }
                             }
@@ -205,18 +197,16 @@ public class Broker implements Node{
                         //Redirects the user to the Broker responsible for the requested topic
                         } else {
                             message = String.valueOf(rightPort); //Sending the right port
-                            System.out.println("Eisai malakas? " + message);
                             outC.writeObject(new SocketMessage("USER_TOPIC_LOOKUP_REDIRECT", new SocketMessageContent(message)));
                             outC.flush();
                             //The User disconnects
 
                         }
+                    }else if (response.getType().equals("TERMINAL")){
+                        System.out.println("User disconnected.");
                     }
 
                 }
-
-                //response = (SocketMessage) inP.readObject();
-                //connectionType = response.getType();
 
                 /**
                  * Communication with a Publisher
@@ -224,34 +214,22 @@ public class Broker implements Node{
                 else if (connectionType.equals("PUBLISHER_CONNECTION")){
                     profileName = response.getContent().getMessage();
 
-                    response = (SocketMessage) inP.readObject();
-                    currentTopic = response.getContent().getMessage();
-
                     message = "Connected to Publisher: " +profileName+ " Waiting for message!";
                     System.out.println(message);
                     outC.writeObject(new SocketMessage("BROKER_CONNECTED", new SocketMessageContent(message)));
                     outC.flush();
 
-                    //edw tha ginei h while gia ta push tou publisher
-                    //add sto hashmap sto Topic
-                    //add to arraylist history
                     message = "";
                     while(true){
                         response = (SocketMessage) inP.readObject(); //Reading type of message
                         connectionType = response.getType();
-
-                        if (connectionType.equals("PUSH_STRING_MESSAGE")){
-                            System.out.println("Receiving chunk: " + response.getContent().getMessage());
+                        if(connectionType.equals("PUSH_QUIT_MESSAGE")){
                             if (response.getContent().getMessage().equals("last")) break;
+                        }
+                        if (connectionType.equals("PUSH_STRING_MESSAGE")){
+                            System.out.println(profileName+": " + response.getContent().getMessage());
                             message += response.getContent().getMessage();
                         }
-                        //else {
-                            /*
-                            inChunk = new ObjectInputStream(connection.getInputStream());
-                            Value[] chunk = new Value[];
-                            chunk[] = (Object) inChunk.readObject();
-                            */
-                        //}
                     }
                     System.out.println(currentTopic);
                     //Add the incoming message to the Topic's history
