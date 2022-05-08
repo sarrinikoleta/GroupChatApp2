@@ -155,7 +155,7 @@ public class Publisher extends Thread {
                  */
                 File file         = new File(file_path);
 
-                
+
                 // Notify Broker that Publisher is going to send a file
                 out.writeObject(new SocketMessage("PUSH_FILE",new SocketMessageContent(file.getName())));
                 out.flush();
