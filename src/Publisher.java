@@ -34,11 +34,6 @@ public class Publisher extends Thread {
     }
 
 
-
-
-
-
-
     public void run() {
         try {
 
@@ -69,26 +64,18 @@ public class Publisher extends Thread {
                     message = keyboard.readLine().trim();
                     //System.out.println(message);
 
-                    if(message.equals("quit")){
+                    if(message.equals("quit")){  //gia disconnect
                         out.writeObject(new SocketMessage("PUSH_STRING_MESSAGE",new SocketMessageContent("quit")));
                         out.flush();
                         System.out.println("End of sending strings");
                         break;
-                    } else{
+                    } //else if (message.equals("back")){
+                       // break;
+                    //}
+                    else{
                         push(topic,message);
                     }
-
-                    /*
-                    if (message.startsWith("video") | message.startsWith("photo") | message.startsWith("txt"))   {
-                        String[] arrOfStr = message.split(" ", 2);
-                        String path = arrOfStr[1];
-                        m = new MultimediaFile(path,profileName,"","",null);
-                        v = new Value(m);
-                        //push(topic,v);
-                    }else if (message.equals("back")){
-                        //epistrefei ston user na epileksei topic
-                    }
-                    */
+                    
                     /*
                     for(int i=0;i<5;i++){
                         System.out.println("Sending string number: " + i);
@@ -117,8 +104,6 @@ public class Publisher extends Thread {
             }
         }
     }
-
-
 
 
     private void push(String topic,String message)  {
@@ -153,8 +138,7 @@ public class Publisher extends Thread {
                  example : video C:\ Users\ user1\ Downloads\ whatsapp.mp4
 
                  */
-                File file         = new File(file_path);
-
+                File file = new File(file_path);
 
                 // Notify Broker that Publisher is going to send a file
                 out.writeObject(new SocketMessage("PUSH_FILE",new SocketMessageContent(file.getName())));
@@ -180,7 +164,6 @@ public class Publisher extends Thread {
                 v = new Value(m);
                 out.writeObject(v); //Sends terminal value.
                 out.flush();
-
             }
 
         }catch (IOException e) {
