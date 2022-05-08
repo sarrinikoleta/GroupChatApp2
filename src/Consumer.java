@@ -18,7 +18,7 @@ public class Consumer extends Thread {
 
 
 
-    public Consumer(Socket connection , String topic ,String profileName) {
+    public Consumer(Socket connection , String topic ,String profileName ,int port) {
         try {
 
             this.profileName = profileName;
@@ -139,10 +139,6 @@ public class Consumer extends Thread {
             }
         }).start();
     }
-
-
-
-
      */
 
 
